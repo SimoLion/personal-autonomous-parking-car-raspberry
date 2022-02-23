@@ -140,7 +140,6 @@ class MotorService:
         sleep(t)
 
     def health_check(self)->str:
-        
         try:
             self.move(wheel='ALL', speed=0.4)
             sleep(0.1)

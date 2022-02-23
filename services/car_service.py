@@ -48,34 +48,36 @@ class CarService:
 
         if self.is_spot_aceptable(distances):
             print("Parking...")
-            #move_in_spot()
+            self.led.stop_leds()
+            danger_lights.kill()
+            self.move_in_spot()
             print("Parking complete")
             is_parked= True
+
             
         else:
             print("This spot is not large enough!\nLets keep looking!")
-
-        
-
-        self.led.stop_leds()
-        danger_lights.kill()
+            self.led.stop_leds()
+            danger_lights.kill()
+            self.led.aborting_led()
+            
         return is_parked
 
 
     def is_spot_aceptable(self,distances: List[int]) -> bool:
 
-        if any(x<25 for x in distances):
+        if any(x<20 for x in distances):
             return False
         else:
             return True
 
 
-    async def move_in_spot(self)->None:
+    def move_in_spot(self)->None:
         end_time = time()+0.6
 
         while time() < end_time:
-            self.move_car("right", speed=0.3)
-            await asyncio.sleep(0.1)
+            self.move_car("right", speed=0.55)
+            sleep(0.1)
 
         self.move_car("stop")
 
@@ -233,7 +235,7 @@ class CarService:
         health_status = {}
         with ThreadPoolExecutor(max_workers=4) as executor:
             loop = asyncio.get_running_loop()
-            checks = [self.motor.health_check,self.sensor.health_check,self.servo.health_check]
+            checks = [self.motor.health_check,self.servo.health_check,self.sensor.health_check]
             for check in checks:
                 future = loop.run_in_executor(executor,check)
                 result = await asyncio.wait_for(future, timeout=5, loop=loop)
